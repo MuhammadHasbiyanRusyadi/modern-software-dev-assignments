@@ -13,7 +13,7 @@ Name: **Muhammad Hasbiyan Rusyadi* \
 SUNet ID: **-** \
 Citations: **-**
 
-This assignment took me about **TODO** hours to do. 
+This assignment took me about **4** hours to do. 
 
 
 ## YOUR RESPONSES

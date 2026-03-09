@@ -15,7 +15,12 @@ Keep the implementation minimal.
 """
 
 # TODO: Fill this in!
-YOUR_REFLEXION_PROMPT = ""
+YOUR_REFLEXION_PROMPT = """You are a Python expert. Your previous code failed some test cases.
+Below is the previous implementation and the specific test failures.
+Analyze the failures, identify the missing requirements (e.g., length, uppercase, digits, or special characters), 
+and provide a corrected version of the function is_valid_password(password: str) -> bool.
+Output ONLY the corrected fenced Python code block.
+"""
 
 
 # Ground-truth test suite used to evaluate generated code
@@ -92,11 +97,27 @@ def generate_initial_function(system_prompt: str) -> str:
 
 
 def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
-    """TODO: Build the user message for the reflexion step using prev_code and failures.
-
-    Return a string that will be sent as the user content alongside the reflexion system prompt.
+    #bikin kode disini buat AI-nye
     """
-    return ""
+    Constructs the user message containing the previous code and the 
+    list of failed test cases to guide the model's correction.
+    """
+    failures_formatted = "\n".join([f"- {f}" for f in failures])
+
+    context = f"""
+### Previous Attempted Code:
+```python
+{prev_code}
+
+
+def apply_reflexion(
+    reflexion_prompt: str,
+    build_context: Callable[[str, List[str]], str],
+    prev_code: str,
+    failures: List[str],
+### Previous Attempted Code:
+```python
+{prev_code}
 
 
 def apply_reflexion(

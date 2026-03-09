@@ -8,7 +8,13 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """solve the math problem using Chain of Thought, do the step below 
+    1. determine the relevant theorem such as Euler Totient Theorem. 
+    2. calculate the value of phi for the given modulus. 
+    3. reduce the exponent by dividing it by the phi value. 
+    4. calculate the final result of the remaining power carefully. 
+    Ensure every step of the calculation is logical and detailed. 
+    At the very last line you must write the final result in the format Answer: number"""
 
 
 USER_PROMPT = """

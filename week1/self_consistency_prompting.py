@@ -9,7 +9,13 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in! Try to get as close to 100% correctness across all runs as possible.
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """You are a precise math assistant. Solve the problem step by step using the following logic. 
+    1. identify the total distance of the trip. 
+    2. determine the exact mileage of the first stop.
+    3. calculate the mileage of the second stop by subtracting the remaining distance from the total distance. 
+    4. calculate the difference between the second stop and the first stop to find the miles traveled between them. 
+    Double check your subtraction at each stage. 
+    Provide your final result on the last line in the format Answer: number"""
 
 USER_PROMPT = """
 Solve this problem, then give the final answer on the last line as "Answer: <number>".

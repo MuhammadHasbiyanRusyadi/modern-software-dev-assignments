@@ -21,6 +21,37 @@ def get_connection() -> sqlite3.Connection:
     return connection
 
 
+def _fetchall(query: str, params: tuple = ()) -> list[sqlite3.Row]:
+    """Helper to run a SELECT and return all rows."""
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        return list(cursor.fetchall())
+
+
+def _fetchone(query: str, params: tuple = ()) -> Optional[sqlite3.Row]:
+    """Helper to run a SELECT and return a single row or None."""
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        return cursor.fetchone()
+
+
+def _execute(query: str, params: tuple = ()) -> Optional[int]:
+    """Helper to execute INSERT/UPDATE/DELETE and return lastrowid when available.
+
+    Returns the lastrowid (int) for INSERT statements, or None otherwise.
+    """
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        connection.commit()
+        try:
+            return int(cursor.lastrowid) if cursor.lastrowid is not None else None
+        except Exception:
+            return None
+
+
 def init_db() -> None:
     ensure_data_directory_exists()
     with get_connection() as connection:
@@ -50,29 +81,17 @@ def init_db() -> None:
 
 
 def insert_note(content: str) -> int:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        cursor.execute("INSERT INTO notes (content) VALUES (?)", (content,))
-        connection.commit()
-        return int(cursor.lastrowid)
+    last = _execute("INSERT INTO notes (content) VALUES (?)", (content,))
+    # _execute should return the newly inserted row id
+    return int(last)  # type: ignore[arg-type]
 
 
 def list_notes() -> list[sqlite3.Row]:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        cursor.execute("SELECT id, content, created_at FROM notes ORDER BY id DESC")
-        return list(cursor.fetchall())
+    return _fetchall("SELECT id, content, created_at FROM notes ORDER BY id DESC")
 
 
 def get_note(note_id: int) -> Optional[sqlite3.Row]:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        cursor.execute(
-            "SELECT id, content, created_at FROM notes WHERE id = ?",
-            (note_id,),
-        )
-        row = cursor.fetchone()
-        return row
+    return _fetchone("SELECT id, content, created_at FROM notes WHERE id = ?", (note_id,))
 
 
 def insert_action_items(items: list[str], note_id: Optional[int] = None) -> list[int]:
@@ -90,27 +109,19 @@ def insert_action_items(items: list[str], note_id: Optional[int] = None) -> list
 
 
 def list_action_items(note_id: Optional[int] = None) -> list[sqlite3.Row]:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        if note_id is None:
-            cursor.execute(
-                "SELECT id, note_id, text, done, created_at FROM action_items ORDER BY id DESC"
-            )
-        else:
-            cursor.execute(
-                "SELECT id, note_id, text, done, created_at FROM action_items WHERE note_id = ? ORDER BY id DESC",
-                (note_id,),
-            )
-        return list(cursor.fetchall())
+    if note_id is None:
+        return _fetchall(
+            "SELECT id, note_id, text, done, created_at FROM action_items ORDER BY id DESC"
+        )
+    return _fetchall(
+        "SELECT id, note_id, text, done, created_at FROM action_items WHERE note_id = ? ORDER BY id DESC",
+        (note_id,),
+    )
 
 
 def mark_action_item_done(action_item_id: int, done: bool) -> None:
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        cursor.execute(
-            "UPDATE action_items SET done = ? WHERE id = ?",
-            (1 if done else 0, action_item_id),
-        )
-        connection.commit()
+    _execute(
+        "UPDATE action_items SET done = ? WHERE id = ?", (1 if done else 0, action_item_id)
+    )
 
 
